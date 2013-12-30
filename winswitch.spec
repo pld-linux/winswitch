@@ -1,52 +1,63 @@
-%define VERSION 0.12.18
-
-
-# Basic groups of dependencies (platform specific overrides below)
-%define xorg_utils xorg-x11-server-utils
-%define python_base pygtk2, python-crypto, python-twisted, python-imaging, python-xlib
-%define python_extras nautilus-python, dbus-python
-%define proto_deps xpra >= 0.3, nx, rdesktop, openssh-clients, tigervnc, tigervnc-server >= 1.0.90
-%define mdns avahi
-%define gstreamer gstreamer
-%define pyasn1 python-pyasn1
-%define xorg_extras dbus-x11, xloadimage, devilspie, ImageMagick
-%define recommends_base gnome-menus, gnome-python2, xfreerdp
-%define python_extras nautilus-python, python-utmp, gnome-python2-rsvg
-%define mdns avahi avahi-ui-tools
-
-%define recommends %{recommends_base}, %{xorg_extras}
-
-%define proto_deps xpra, nx, rdesktop, openssh-clients
-%define recommends %{recommends_base}, tigervnc
-%define nautilus_lib /usr/lib/nautilus
-%define mdns avahi avahi-tools
-
-%define python_base_deps %{python_base}, python-uuid, python-ctypes, python-hashlib
-
 Summary:	Front end for controlling remote desktop sessions
 Name:		winswitch
-Version:	%{VERSION}
-Release:	0.1
-License:	GPL3
+Version:	0.12.20
+Release:	0.5
+License:	GPL v3
 Group:		Networking
+#Source0:	http://winswitch.org/src/%{name}-%{version}.tar.gz
+Source0:	%{name}-%{version}.tar.gz
+# Source0-md5:	b2814b2fd6274408ff9820d8fb519a85
 URL:		http://winswitch.org/
-Requires:	%{gstreamer}
-Requires:	%{mdns}
-Requires:	%{proto_deps}
-Requires:	%{pyasn1}
-Requires:	%{python_base_deps}
-Requires:	%{python_extras}
-Requires:	%{xorg_utils}
-Requires:	python
-Suggests:	%{recommends}
-Source0:	http://winswitch.org/src/%{name}-0.12.16.src.tar.bz2
 BuildRequires:	python
 BuildRequires:	python-distribute
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.219
-BuildRequires:	setuptool
+BuildRequires:	sed >= 4.0
+
+Requires:	avahi
+Requires:	avahi-ui
+
+Requires:	gstreamer
+
+#Requires:	gnome-python2-rsvg
+#Requires:	nautilus-python
+#Requires:	python-utmp
+
+Requires:	python-Crypto
+Requires:	python-PIL
+#Requires:	python-ctypes
+#Requires:	python-hashlib
+Requires:	python-pygtk-gtk
+#Requires:	python-twisted
+#Requires:	python-uuid
+#Requires:	python-xlib
+
+Requires:	python
+
+Requires:	python-pyasn1
+
+#Requires:	xorg-x11-server-utils
+
+Requires:	nx
+Requires:	openssh-clients
+Requires:	rdesktop
+#Requires:	tigervnc-server >= 1.0.90
+Requires:	xpra >= 0.7
+
+Suggests:	ImageMagick
+Suggests:	dbus-x11
+#Suggests:	devilspie
+Suggests:	gnome-menus
+#Suggests:	gnome-python2
+Suggests:	tigervnc
+Suggests:	xfreerdp
+#Suggests:	xloadimage
+
 Obsoletes:	shifter
+BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		_libexecdir	%{_prefix}/lib
 
 %description
 Start and control remote GUI sessions via xpra, NX, VNC, RDP or plain
@@ -55,6 +66,14 @@ sessions to other clients.
 
 %prep
 %setup -q
+
+# Requires: /bin/bash /bin/sh %{_bindir}/env %{__python}
+# Requires: /bin/bash /bin/sh /usr/bin/env /usr/bin/python java(ClassDataVersion) >= 49.0 python(abi) = 2.7
+# Requires: /bin/bash /bin/sh /usr/bin/python java(ClassDataVersion) >= 49.0 python(abi) = 2.7
+# TODO: bashism:
+# skel/libexec/winswitch/firewall
+# skel/libexec/winswitch/kill_parent
+grep -rl '/usr/bin/env python' winswitch skel | xargs %{__sed} -i -e '1s,^#!.*python,#!%{__python},'
 
 %build
 %{__python} setup.py build
@@ -68,24 +87,56 @@ rm -rf $RPM_BUILD_ROOT
 
 %py_postclean
 
+# nautilus 2.x (no gnome 2 in pld)
+rm $RPM_BUILD_ROOT%{_libexecdir}/nautilus/extensions-2.0/python/nautilus_winswitch.py
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
 %doc COPYING
-%if 0
-%attr(755,root,root) %{_bindir}/winswitch_*
+%dir %{_sysconfdir}/winswitch
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/winswitch/firewall
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/winswitch/ports.conf
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/winswitch/server_defaults.conf
 %attr(755,root,root) %{_bindir}/wcw
-%{_prefix}/lib*/python*/*packages/winswitch*
-%{_libexecdir}/winswitch
-%{_sysconfdir}/winswitch
-%{_datadir}/winswitch
+%attr(755,root,root) %{_bindir}/winswitch_applet
+%attr(755,root,root) %{_bindir}/winswitch_away
+%attr(755,root,root) %{_bindir}/winswitch_back
+%attr(755,root,root) %{_bindir}/winswitch_client
+%attr(755,root,root) %{_bindir}/winswitch_command_wrapper
+%attr(755,root,root) %{_bindir}/winswitch_open_remotely
+%attr(755,root,root) %{_bindir}/winswitch_server
+%attr(755,root,root) %{_bindir}/winswitch_ssh_Xnest
+%attr(755,root,root) %{_bindir}/winswitch_ssh_session
+%attr(755,root,root) %{_bindir}/winswitch_stdio_socket
+%attr(755,root,root) %{_bindir}/winswitch_stdio_tcp
+%{_mandir}/man1/wcw.1*
+%{_mandir}/man1/winswitch_*.1*
 %{_desktopdir}/winswitch.desktop
-%{_iconsdir}
-%{_datadir}/mime
-%{_mandir}
-%{_datadir}/Thunar
+%{_iconsdir}/hicolor/*/apps/winswitch*.png
+%{_iconsdir}/winswitch_applet.png
+%{_datadir}/mime/packages/winswitch.xml
+
+%{_datadir}/winswitch
+%{py_sitescriptdir}/winswitch
+%{py_sitescriptdir}/winswitch-%{version}-py*.egg-info
+
+%dir %{_libexecdir}/winswitch
+%dir %{_libexecdir}/winswitch/bin-override
+%attr(755,root,root) %{_libexecdir}/winswitch/bin-override/xdg-open
+%attr(755,root,root) %{_libexecdir}/winswitch/delayed_start
+%attr(755,root,root) %{_libexecdir}/winswitch/firewall
+%attr(755,root,root) %{_libexecdir}/winswitch/gst_capture
+%attr(755,root,root) %{_libexecdir}/winswitch/gst_playback
+%attr(755,root,root) %{_libexecdir}/winswitch/kill_parent
+%attr(755,root,root) %{_libexecdir}/winswitch/mime_open
+%attr(755,root,root) %{_libexecdir}/winswitch/server_monitor
+%attr(755,root,root) %{_libexecdir}/winswitch/server_portinfo
+%attr(755,root,root) %{_libexecdir}/winswitch/virt_server_daemonizer
+
+# thunar
+%{_datadir}/Thunar/sendto/thunar-winswitch.desktop
+# jar
 %{_datadir}/Vash
-#%{nautilus_lib}/extensions-2.0/python/nautilus_winswitch.*
-%endif
