@@ -1,7 +1,7 @@
 Summary:	Front end for controlling remote desktop sessions
 Name:		winswitch
 Version:	0.12.20
-Release:	0.5
+Release:	0.6
 License:	GPL v3
 Group:		Networking
 #Source0:	http://winswitch.org/src/%{name}-%{version}.tar.gz
@@ -25,10 +25,11 @@ Requires:	gstreamer
 
 Requires:	python-Crypto
 Requires:	python-PIL
+Requires:	python-TwistedConch
+Requires:	python-TwistedCore
 #Requires:	python-ctypes
 #Requires:	python-hashlib
 Requires:	python-pygtk-gtk
-#Requires:	python-twisted
 #Requires:	python-uuid
 #Requires:	python-xlib
 
