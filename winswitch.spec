@@ -1,7 +1,7 @@
 Summary:	Front end for controlling remote desktop sessions
 Name:		winswitch
 Version:	0.12.20
-Release:	0.6
+Release:	0.8
 License:	GPL v3
 Group:		Networking
 #Source0:	http://winswitch.org/src/%{name}-%{version}.tar.gz
@@ -11,7 +11,7 @@ URL:		http://winswitch.org/
 BuildRequires:	python
 BuildRequires:	python-distribute
 BuildRequires:	rpm-pythonprov
-BuildRequires:	rpmbuild(macros) >= 1.219
+BuildRequires:	rpmbuild(macros) >= 1.672
 BuildRequires:	sed >= 4.0
 
 Requires:	avahi
@@ -21,7 +21,7 @@ Requires:	gstreamer
 
 #Requires:	gnome-python2-rsvg
 #Requires:	nautilus-python
-#Requires:	python-utmp
+Requires:	python-utmp
 
 Requires:	python-Crypto
 Requires:	python-PIL
@@ -39,11 +39,11 @@ Requires:	python-pyasn1
 
 #Requires:	xorg-x11-server-utils
 
-Requires:	nx
 Requires:	openssh-clients
-Requires:	rdesktop
 #Requires:	tigervnc-server >= 1.0.90
 Requires:	xpra >= 0.7
+Suggests:	nx
+Suggests:	rdesktop
 
 Suggests:	ImageMagick
 Suggests:	dbus-x11
@@ -60,6 +60,8 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_libexecdir	%{_prefix}/lib
 
+%define		_noautoreq_java ClassDataVersion
+
 %description
 Start and control remote GUI sessions via xpra, NX, VNC, RDP or plain
 ssh X11 forwarding. You can start, suspend, resume and send supported
@@ -68,12 +70,10 @@ sessions to other clients.
 %prep
 %setup -q
 
-# Requires: /bin/bash /bin/sh %{_bindir}/env %{__python}
-# Requires: /bin/bash /bin/sh /usr/bin/env /usr/bin/python java(ClassDataVersion) >= 49.0 python(abi) = 2.7
-# Requires: /bin/bash /bin/sh /usr/bin/python java(ClassDataVersion) >= 49.0 python(abi) = 2.7
 # TODO: bashism:
 # skel/libexec/winswitch/firewall
 # skel/libexec/winswitch/kill_parent
+
 grep -rl '/usr/bin/env python' winswitch skel | xargs %{__sed} -i -e '1s,^#!.*python,#!%{__python},'
 
 %build
@@ -139,5 +139,8 @@ rm -rf $RPM_BUILD_ROOT
 
 # thunar
 %{_datadir}/Thunar/sendto/thunar-winswitch.desktop
-# jar
+
+# Vash - https://github.com/thevash/vash
+# .jar to make screenshots
+# TODO: package as java-vash and suggest it
 %{_datadir}/Vash
