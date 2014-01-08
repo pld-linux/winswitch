@@ -1,7 +1,9 @@
+# TODO
+# - minimize deps, use more suggests
 Summary:	Front end for controlling remote desktop sessions
 Name:		winswitch
 Version:	0.12.20
-Release:	0.8
+Release:	1
 License:	GPL v3
 Group:		Networking
 #Source0:	http://winswitch.org/src/%{name}-%{version}.tar.gz
