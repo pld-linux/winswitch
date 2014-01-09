@@ -3,7 +3,7 @@
 Summary:	Front end for controlling remote desktop sessions
 Name:		winswitch
 Version:	0.12.20
-Release:	1
+Release:	2
 License:	GPL v3
 Group:		Networking
 #Source0:	http://winswitch.org/src/%{name}-%{version}.tar.gz
@@ -16,10 +16,10 @@ BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.672
 BuildRequires:	sed >= 4.0
 
-Requires:	avahi
-Requires:	avahi-ui
+Suggests:	avahi
+Suggests:	avahi-ui
 
-Requires:	gstreamer
+Suggests:	gstreamer
 
 #Requires:	gnome-python2-rsvg
 #Requires:	nautilus-python
